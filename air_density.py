@@ -5,22 +5,13 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Logo (updated)
+# Logo
 st.image(
     "https://cdn-icons-png.flaticon.com/512/1684/1684375.png",
     width=90
 )
 
 st.title("Air Density Calculator")
-
-# SAFE initialization (IMPORTANT FIX)
-st.session_state.setdefault("altitude", "")
-st.session_state.setdefault("temperature", "")
-st.session_state.setdefault("result", None)
-
-# Inputs
-st.text_input("Altitude (m above MSL)", key="altitude")
-st.text_input("Gas Temperature (°C)", key="temperature")
 
 # Constants
 P0 = 101325
@@ -31,38 +22,44 @@ M = 0.0289644
 R = 8.314462618
 R_specific = 287.058
 
-# Buttons
-col1, col2 = st.columns(2)
-
-# CALCULATE
-if col1.button("Calculate"):
-    try:
-        altitude_val = float(st.session_state.altitude)
-        temp_val = float(st.session_state.temperature)
-
-        exponent = (g * M) / (R * L)
-        P = P0 * (1 - (L * altitude_val) / T0) ** exponent
-
-        T = temp_val + 273.15
-        rho = P / (R_specific * T)
-
-        st.session_state.result = (P, rho)
-
-    except:
-        st.error("Please enter valid numeric values")
-
-# RESET (FINAL FIX — guaranteed clearing)
-if col2.button("Reset"):
-
-    # overwrite values explicitly
-    st.session_state.altitude = ""
-    st.session_state.temperature = ""
+# Result storage
+if "result" not in st.session_state:
     st.session_state.result = None
 
-    # force rerun
-    st.rerun()
+# ================= FORM (FIX FOR RESET ISSUE) =================
+with st.form("calc_form"):
 
-# OUTPUT
+    altitude = st.text_input("Altitude (m above MSL)")
+    temperature = st.text_input("Gas Temperature (°C)")
+
+    col1, col2 = st.columns(2)
+
+    calculate = col1.form_submit_button("Calculate")
+    reset = col2.form_submit_button("Reset")
+
+    # CALCULATE
+    if calculate:
+        try:
+            altitude_val = float(altitude)
+            temp_val = float(temperature)
+
+            exponent = (g * M) / (R * L)
+            P = P0 * (1 - (L * altitude_val) / T0) ** exponent
+
+            T = temp_val + 273.15
+            rho = P / (R_specific * T)
+
+            st.session_state.result = (P, rho)
+
+        except:
+            st.error("Please enter valid numeric values")
+
+    # RESET (FORM SAFETY → NO SESSION STATE ERROR)
+    if reset:
+        st.session_state.result = None
+        st.rerun()
+
+# ================= OUTPUT =================
 if st.session_state.result:
     P, rho = st.session_state.result
 
