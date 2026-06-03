@@ -5,7 +5,7 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Better engineering icon (fluid / airflow related)
+# Engineering icon (air / fluid)
 st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
 
 st.title("Air Density Calculator")
@@ -18,7 +18,7 @@ if "temperature" not in st.session_state:
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs
+# Inputs (no +/- buttons)
 altitude = st.text_input("Altitude (m above MSL)", value=st.session_state.altitude)
 temperature = st.text_input("Gas Temperature (°C)", value=st.session_state.temperature)
 
@@ -66,13 +66,12 @@ if st.session_state.result:
 
     # ---- Pressure Table ----
     pressure_df = pd.DataFrame({
-        "Parameter": ["Pressure", "Pressure", "Pressure", "Pressure", "Pressure"],
         "Unit": ["Pa", "kPa", "bar", "atm", "mmWC"],
         "Value": [
             f"{P:.2f}",
             f"{P/1000:.2f}",
-            f"{P/100000:.5f}",
-            f"{P/101325:.5f}",
+            f"{P/100000:.2f}",
+            f"{P/101325:.2f}",
             f"{P/9.80665:.2f}"
         ]
     })
@@ -82,14 +81,13 @@ if st.session_state.result:
 
     # ---- Density Table ----
     density_df = pd.DataFrame({
-        "Parameter": ["Density", "Density", "Density", "Density", "Density"],
         "Unit": ["kg/m³", "g/cm³", "lb/ft³", "slug/ft³", "kg/L"],
         "Value": [
             f"{rho:.2f}",
-            f"{rho/1000:.6f}",
+            f"{rho/1000:.2f}",
             f"{rho*0.062428:.2f}",
-            f"{rho*0.00194032:.5f}",
-            f"{rho/1000:.6f}"
+            f"{rho*0.00194032:.2f}",
+            f"{rho/1000:.2f}"
         ]
     })
 
