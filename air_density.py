@@ -10,11 +10,11 @@ st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
 
 st.title("Air Density Calculator")
 
-# Initialize session state safely
+# Initialize result only
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs (controlled by widget key)
+# Inputs
 altitude = st.text_input("Altitude (m above MSL)", key="altitude")
 temperature = st.text_input("Gas Temperature (°C)", key="temperature")
 
@@ -47,11 +47,9 @@ if col1.button("Calculate"):
     except:
         st.error("Please enter valid numeric values")
 
-# Reset (SAFE FIX)
+# Reset (SAFE FIX - NO ERROR VERSION)
 if col2.button("Reset"):
-    st.session_state.altitude = ""
-    st.session_state.temperature = ""
-    st.session_state.result = None
+    st.session_state.clear()
     st.rerun()
 
 # Output
@@ -75,7 +73,7 @@ if st.session_state.result:
     st.markdown("### Pressure")
     st.dataframe(pressure_df, use_container_width=True, hide_index=True)
 
-    # Density table (ONLY 2 units)
+    # Density table (ONLY 2 UNITS)
     density_df = pd.DataFrame({
         "Unit": ["kg/m³", "lb/ft³"],
         "Value": [
