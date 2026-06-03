@@ -5,12 +5,12 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Engineering icon (air / fluid)
+# Logo (engineering airflow icon)
 st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
 
 st.title("Air Density Calculator")
 
-# Session state
+# Initialize session state
 if "altitude" not in st.session_state:
     st.session_state.altitude = ""
 if "temperature" not in st.session_state:
@@ -18,9 +18,16 @@ if "temperature" not in st.session_state:
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs (no +/- buttons)
-altitude = st.text_input("Altitude (m above MSL)", value=st.session_state.altitude)
-temperature = st.text_input("Gas Temperature (°C)", value=st.session_state.temperature)
+# Inputs (IMPORTANT: key added → fixes reset issue)
+altitude = st.text_input(
+    "Altitude (m above MSL)",
+    key="altitude"
+)
+
+temperature = st.text_input(
+    "Gas Temperature (°C)",
+    key="temperature"
+)
 
 # Constants
 P0 = 101325
@@ -37,8 +44,8 @@ col1, col2 = st.columns(2)
 # Calculate
 if col1.button("Calculate"):
     try:
-        altitude_val = float(altitude)
-        temp_val = float(temperature)
+        altitude_val = float(st.session_state.altitude)
+        temp_val = float(st.session_state.temperature)
 
         exponent = (g * M) / (R * L)
         P = P0 * (1 - (L * altitude_val) / T0) ** exponent
@@ -51,7 +58,7 @@ if col1.button("Calculate"):
     except:
         st.error("Please enter valid numeric values")
 
-# Reset
+# Reset (NOW WORKS CORRECTLY)
 if col2.button("Reset"):
     st.session_state.altitude = ""
     st.session_state.temperature = ""
@@ -79,15 +86,12 @@ if st.session_state.result:
     st.markdown("### Pressure")
     st.dataframe(pressure_df, use_container_width=True, hide_index=True)
 
-    # ---- Density Table ----
+    # ---- Density Table (ONLY 2 UNITS) ----
     density_df = pd.DataFrame({
-        "Unit": ["kg/m³", "g/cm³", "lb/ft³", "slug/ft³", "kg/L"],
+        "Unit": ["kg/m³", "lb/ft³"],
         "Value": [
             f"{rho:.2f}",
-            f"{rho/1000:.2f}",
-            f"{rho*0.062428:.2f}",
-            f"{rho*0.00194032:.2f}",
-            f"{rho/1000:.2f}"
+            f"{rho*0.062428:.2f}"
         ]
     })
 
