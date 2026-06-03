@@ -5,29 +5,18 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Logo (engineering airflow icon)
+# Logo
 st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
 
 st.title("Air Density Calculator")
 
-# Initialize session state
-if "altitude" not in st.session_state:
-    st.session_state.altitude = ""
-if "temperature" not in st.session_state:
-    st.session_state.temperature = ""
+# Initialize session state safely
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs (IMPORTANT: key added → fixes reset issue)
-altitude = st.text_input(
-    "Altitude (m above MSL)",
-    key="altitude"
-)
-
-temperature = st.text_input(
-    "Gas Temperature (°C)",
-    key="temperature"
-)
+# Inputs (controlled by widget key)
+altitude = st.text_input("Altitude (m above MSL)", key="altitude")
+temperature = st.text_input("Gas Temperature (°C)", key="temperature")
 
 # Constants
 P0 = 101325
@@ -44,8 +33,8 @@ col1, col2 = st.columns(2)
 # Calculate
 if col1.button("Calculate"):
     try:
-        altitude_val = float(st.session_state.altitude)
-        temp_val = float(st.session_state.temperature)
+        altitude_val = float(altitude)
+        temp_val = float(temperature)
 
         exponent = (g * M) / (R * L)
         P = P0 * (1 - (L * altitude_val) / T0) ** exponent
@@ -58,7 +47,7 @@ if col1.button("Calculate"):
     except:
         st.error("Please enter valid numeric values")
 
-# Reset (NOW WORKS CORRECTLY)
+# Reset (SAFE FIX)
 if col2.button("Reset"):
     st.session_state.altitude = ""
     st.session_state.temperature = ""
@@ -71,7 +60,7 @@ if st.session_state.result:
 
     st.subheader("Results")
 
-    # ---- Pressure Table ----
+    # Pressure table
     pressure_df = pd.DataFrame({
         "Unit": ["Pa", "kPa", "bar", "atm", "mmWC"],
         "Value": [
@@ -86,12 +75,12 @@ if st.session_state.result:
     st.markdown("### Pressure")
     st.dataframe(pressure_df, use_container_width=True, hide_index=True)
 
-    # ---- Density Table (ONLY 2 UNITS) ----
+    # Density table (ONLY 2 units)
     density_df = pd.DataFrame({
         "Unit": ["kg/m³", "lb/ft³"],
         "Value": [
             f"{rho:.2f}",
-            f"{rho*0.062428:.2f}"
+            f"{rho * 0.062428:.2f}"
         ]
     })
 
