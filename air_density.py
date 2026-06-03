@@ -1,11 +1,12 @@
 import math
 import streamlit as st
+import pandas as pd
 
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Logo
-st.image("https://cdn-icons-png.flaticon.com/512/2933/2933245.png", width=80)
+# Better engineering icon (fluid / airflow related)
+st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
 
 st.title("Air Density Calculator")
 
@@ -17,7 +18,7 @@ if "temperature" not in st.session_state:
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs (no +/- buttons)
+# Inputs
 altitude = st.text_input("Altitude (m above MSL)", value=st.session_state.altitude)
 temperature = st.text_input("Gas Temperature (°C)", value=st.session_state.temperature)
 
@@ -64,33 +65,33 @@ if st.session_state.result:
     st.subheader("Results")
 
     # ---- Pressure Table ----
-    st.markdown("### Pressure")
-
-    pressure_data = {
+    pressure_df = pd.DataFrame({
+        "Parameter": ["Pressure", "Pressure", "Pressure", "Pressure", "Pressure"],
         "Unit": ["Pa", "kPa", "bar", "atm", "mmWC"],
         "Value": [
-            f"{P:,.2f}",
-            f"{P/1000:,.3f}",
-            f"{P/100000:,.5f}",
-            f"{P/101325:,.5f}",
-            f"{P/9.80665:,.2f}"
+            f"{P:.2f}",
+            f"{P/1000:.2f}",
+            f"{P/100000:.5f}",
+            f"{P/101325:.5f}",
+            f"{P/9.80665:.2f}"
         ]
-    }
+    })
 
-    st.table(pressure_data)
+    st.markdown("### Pressure")
+    st.dataframe(pressure_df, use_container_width=True, hide_index=True)
 
     # ---- Density Table ----
-    st.markdown("### Density")
-
-    density_data = {
+    density_df = pd.DataFrame({
+        "Parameter": ["Density", "Density", "Density", "Density", "Density"],
         "Unit": ["kg/m³", "g/cm³", "lb/ft³", "slug/ft³", "kg/L"],
         "Value": [
-            f"{rho:.4f}",
+            f"{rho:.2f}",
             f"{rho/1000:.6f}",
-            f"{rho*0.062428:.4f}",
-            f"{rho*0.00194032:.6f}",
+            f"{rho*0.062428:.2f}",
+            f"{rho*0.00194032:.5f}",
             f"{rho/1000:.6f}"
         ]
-    }
+    })
 
-    st.table(density_data)
+    st.markdown("### Density")
+    st.dataframe(density_df, use_container_width=True, hide_index=True)
