@@ -5,7 +5,7 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# NEW LOGO (clean engineering airflow icon)
+# Logo (updated)
 st.image(
     "https://cdn-icons-png.flaticon.com/512/1684/1684375.png",
     width=90
@@ -13,11 +13,12 @@ st.image(
 
 st.title("Air Density Calculator")
 
-# Initialize session state safely
-if "result" not in st.session_state:
-    st.session_state.result = None
+# SAFE initialization (IMPORTANT FIX)
+st.session_state.setdefault("altitude", "")
+st.session_state.setdefault("temperature", "")
+st.session_state.setdefault("result", None)
 
-# Inputs (controlled by session_state keys)
+# Inputs
 st.text_input("Altitude (m above MSL)", key="altitude")
 st.text_input("Gas Temperature (°C)", key="temperature")
 
@@ -30,10 +31,10 @@ M = 0.0289644
 R = 8.314462618
 R_specific = 287.058
 
-# Layout buttons
+# Buttons
 col1, col2 = st.columns(2)
 
-# Calculate
+# CALCULATE
 if col1.button("Calculate"):
     try:
         altitude_val = float(st.session_state.altitude)
@@ -50,14 +51,18 @@ if col1.button("Calculate"):
     except:
         st.error("Please enter valid numeric values")
 
-# RESET (ALL FIELDS CLEAR FIX)
+# RESET (FINAL FIX — guaranteed clearing)
 if col2.button("Reset"):
-    for key in ["altitude", "temperature", "result"]:
-        if key in st.session_state:
-            del st.session_state[key]
+
+    # overwrite values explicitly
+    st.session_state.altitude = ""
+    st.session_state.temperature = ""
+    st.session_state.result = None
+
+    # force rerun
     st.rerun()
 
-# Output
+# OUTPUT
 if st.session_state.result:
     P, rho = st.session_state.result
 
@@ -78,7 +83,7 @@ if st.session_state.result:
     st.markdown("### Pressure")
     st.dataframe(pressure_df, use_container_width=True, hide_index=True)
 
-    # Density table (ONLY 2 UNITS)
+    # Density table
     density_df = pd.DataFrame({
         "Unit": ["kg/m³", "lb/ft³"],
         "Value": [
