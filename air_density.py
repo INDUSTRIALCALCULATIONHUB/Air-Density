@@ -1,24 +1,30 @@
 import math
 import streamlit as st
 
-# Page config
-st.set_page_config(page_title="Air Density Calculator", layout="centered")
+st.set_page_config(page_title="Air Density Calculator")
 
 st.title("Air Density Calculator")
-st.write("Calculate atmospheric pressure and air density based on altitude and temperature")
 
-# Inputs
-altitude = st.number_input("Altitude (m above MSL)", value=0.0, step=10.0)
-temperature = st.number_input("Gas Temperature (°C)", value=25.0, step=1.0)
+# Initialize session state for inputs
+if "altitude" not in st.session_state:
+    st.session_state.altitude = ""
+if "temperature" not in st.session_state:
+    st.session_state.temperature = ""
+if "result" not in st.session_state:
+    st.session_state.result = None
+
+# Input fields (TEXT → no +/- buttons)
+altitude = st.text_input("Altitude (m above MSL)", value=st.session_state.altitude)
+temperature = st.text_input("Gas Temperature (°C)", value=st.session_state.temperature)
 
 # Constants
-P0 = 101325        # Pa
-T0 = 288.16        # K
-L = 0.0065         # K/m
-g = 9.80665        # m/s²
-M = 0.0289644      # kg/mol
-R = 8.314462618    # J/mol·K
-R_specific = 287.058  # J/kg·K
+P0 = 101325
+T0 = 288.16
+L = 0.0065
+g = 9.80665
+M = 0.0289644
+R = 8.314462618
+R_specific = 287.058
 
 # Buttons
 col1, col2 = st.columns(2)
@@ -26,25 +32,31 @@ col1, col2 = st.columns(2)
 # Calculate button
 if col1.button("Calculate"):
     try:
-        # Pressure using ISA model
+        altitude_val = float(altitude)
+        temp_val = float(temperature)
+
         exponent = (g * M) / (R * L)
-        P = P0 * (1 - (L * altitude) / T0) ** exponent
+        P = P0 * (1 - (L * altitude_val) / T0) ** exponent
 
-        # Convert temperature to Kelvin
-        T = temperature + 273.15
-
-        # Density calculation
+        T = temp_val + 273.15
         rho = P / (R_specific * T)
 
-        # Output
-        st.subheader("Results")
-        st.success(f"Atmospheric Pressure: {P:,.2f} Pa")
-        st.success(f"Air Density: {rho:.3f} kg/m³")
+        st.session_state.result = (P, rho)
 
-    except Exception as e:
-        st.error("Error in calculation. Please check inputs.")
+    except:
+        st.error("Please enter valid numeric values")
 
 # Reset button
 if col2.button("Reset"):
-    st.session_state.clear()
+    st.session_state.altitude = ""
+    st.session_state.temperature = ""
+    st.session_state.result = None
     st.rerun()
+
+# Show results ONLY after calculation
+if st.session_state.result:
+    P, rho = st.session_state.result
+
+    st.subheader("Results")
+    st.success(f"Atmospheric Pressure: {P:,.2f} Pa")
+    st.success(f"Air Density: {rho:.3f} kg/m³")
