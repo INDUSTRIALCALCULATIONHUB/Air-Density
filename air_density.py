@@ -1,44 +1,74 @@
 import math
+import tkinter as tk
+from tkinter import messagebox
 
-def air_density(altitude_m, temp_c):
-    """
-    Calculate air density based on altitude and gas temperature.
+# Function to calculate density
+def calculate():
+    try:
+        altitude = float(entry_altitude.get())
+        temp_c = float(entry_temp.get())
 
-    Inputs:
-    altitude_m : Altitude in meters (from MSL)
-    temp_c     : Gas temperature in degree Celsius
+        # Constants
+        P0 = 101325
+        T0 = 288.16
+        L = 0.0065
+        g = 9.80665
+        M = 0.0289644
+        R = 8.314462618
+        R_specific = 287.058
 
-    Returns:
-    density (kg/m3), pressure (Pa)
-    """
+        # Pressure (ISA model)
+        exponent = (g * M) / (R * L)
+        P = P0 * (1 - (L * altitude) / T0) ** exponent
 
-    # Constants
-    P0 = 101325        # Sea level pressure (Pa)
-    T0 = 288.16        # Sea level temperature (K)
-    L = 0.0065         # Lapse rate (K/m)
-    g = 9.80665        # Gravity (m/s2)
-    M = 0.0289644      # Molar mass of air (kg/mol)
-    R = 8.314462618    # Universal gas constant (J/mol.K)
-    R_specific = 287.058  # Specific gas constant (J/kg.K)
+        # Temperature in Kelvin
+        T = temp_c + 273.15
 
-    # Step 1: Calculate pressure using ISA model
-    exponent = (g * M) / (R * L)
-    P = P0 * (1 - (L * altitude_m) / T0) ** exponent
+        # Density
+        rho = P / (R_specific * T)
 
-    # Step 2: Convert temperature to Kelvin
-    T = temp_c + 273.15
+        # Display results
+        result_pressure.config(text=f"{P:.2f} Pa")
+        result_density.config(text=f"{rho:.3f} kg/m³")
 
-    # Step 3: Calculate density
-    rho = P / (R_specific * T)
-
-    return rho, P
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter valid numeric values")
 
 
-# Example usage
-altitude = 400       # meters
-temperature = 60     # deg C
+# Function to reset inputs
+def reset():
+    entry_altitude.delete(0, tk.END)
+    entry_temp.delete(0, tk.END)
+    result_pressure.config(text="")
+    result_density.config(text="")
 
-density, pressure = air_density(altitude, temperature)
 
-print(f"Pressure: {pressure:.2f} Pa")
-print(f"Density : {density:.3f} kg/m3")
+# Create window
+root = tk.Tk()
+root.title("Air Density Calculator")
+root.geometry("350x250")
+
+# Labels and Inputs
+tk.Label(root, text="Altitude (m):").pack(pady=5)
+entry_altitude = tk.Entry(root)
+entry_altitude.pack()
+
+tk.Label(root, text="Temperature (°C):").pack(pady=5)
+entry_temp = tk.Entry(root)
+entry_temp.pack()
+
+# Buttons
+tk.Button(root, text="Calculate", command=calculate, bg="lightgreen").pack(pady=10)
+tk.Button(root, text="Reset", command=reset, bg="lightcoral").pack()
+
+# Results
+tk.Label(root, text="Pressure:").pack(pady=5)
+result_pressure = tk.Label(root, text="", fg="blue")
+result_pressure.pack()
+
+tk.Label(root, text="Density:").pack(pady=5)
+result_density = tk.Label(root, text="", fg="blue")
+result_density.pack()
+
+# Run app
+root.mainloop()
