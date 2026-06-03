@@ -5,18 +5,21 @@ import pandas as pd
 # Page setup
 st.set_page_config(page_title="Air Density Calculator", layout="centered")
 
-# Logo
-st.image("https://cdn-icons-png.flaticon.com/512/4149/4149643.png", width=80)
+# NEW LOGO (clean engineering airflow icon)
+st.image(
+    "https://cdn-icons-png.flaticon.com/512/1684/1684375.png",
+    width=90
+)
 
 st.title("Air Density Calculator")
 
-# Initialize result only
+# Initialize session state safely
 if "result" not in st.session_state:
     st.session_state.result = None
 
-# Inputs
-altitude = st.text_input("Altitude (m above MSL)", key="altitude")
-temperature = st.text_input("Gas Temperature (°C)", key="temperature")
+# Inputs (controlled by session_state keys)
+st.text_input("Altitude (m above MSL)", key="altitude")
+st.text_input("Gas Temperature (°C)", key="temperature")
 
 # Constants
 P0 = 101325
@@ -27,14 +30,14 @@ M = 0.0289644
 R = 8.314462618
 R_specific = 287.058
 
-# Buttons
+# Layout buttons
 col1, col2 = st.columns(2)
 
 # Calculate
 if col1.button("Calculate"):
     try:
-        altitude_val = float(altitude)
-        temp_val = float(temperature)
+        altitude_val = float(st.session_state.altitude)
+        temp_val = float(st.session_state.temperature)
 
         exponent = (g * M) / (R * L)
         P = P0 * (1 - (L * altitude_val) / T0) ** exponent
@@ -47,9 +50,11 @@ if col1.button("Calculate"):
     except:
         st.error("Please enter valid numeric values")
 
-# Reset (SAFE FIX - NO ERROR VERSION)
+# RESET (ALL FIELDS CLEAR FIX)
 if col2.button("Reset"):
-    st.session_state.clear()
+    for key in ["altitude", "temperature", "result"]:
+        if key in st.session_state:
+            del st.session_state[key]
     st.rerun()
 
 # Output
